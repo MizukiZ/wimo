@@ -23,7 +23,8 @@
     "request": "^2.81.0",
     "shortid": "^2.2.8",
     "victory": "^0.21.3",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "whatwg-fetch": "^2.0.3"
   },
   "proxy": "https://api.staging.conctr.com",
   "scripts": {

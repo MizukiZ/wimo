@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import RuleRow from "../molecules/RuleRow"
-import { getAlertSettings as getDeviceAlertSettings } from "../../api/device"
+import { getAlertConfig, updateAlertConfig } from "../../api/device"
 import CircularProgress from "material-ui/CircularProgress"
 import RaisedButton from "material-ui/RaisedButton"
 import TextField from "material-ui/TextField"
@@ -18,12 +18,11 @@ function makeNumberStringInt(object) {
 export default class RulesUI extends Component {
   state = {
     rules: {},
-    loading: true,
-    numberTo: "",
-    alertMessage: ""
+    loading: true
+    // numberTo: "",
+    // alertMessage: ""
   }
 
-  alertSendSettings
   /*
   {
     "_ts":{ "gt": time, "lt": time},
@@ -54,11 +53,12 @@ export default class RulesUI extends Component {
     this.setState({ rules: rules })
   }
 
-  onInputChange = (e, newValue) => {
-    this.setState({
-      [e.target.id]: newValue
-    })
-  }
+  // onInputChange = (e, newValue) => {
+  //   this.setState({
+  //     [e.target.id]: newValue
+  //   })
+  // }
+
   onToggle = (key, condition, toggleVal, fieldValue) => {
     let rules = { ...this.state.rules }
     if (toggleVal) {
@@ -85,14 +85,12 @@ export default class RulesUI extends Component {
   }
 
   componentDidMount() {
-    getDeviceAlertSettings().then(alertSettings => {
-      this.alertSendSettings = alertSettings.alertSettings
-      delete alertSettings.alertSettings
+    getAlertConfig(this.props.deviceId).then(data => {
       this.setState({
-        rules: alertSettings,
-        loading: false,
-        numberTo: this.alertSendSettings.to,
-        alertMessage: this.alertSendSettings.message
+        rules: data.alertconfig,
+        loading: false
+        // numberTo: this.alertSendSettings.to,
+        // alertMessage: this.alertSendSettings.message
       })
     })
   }
@@ -110,6 +108,8 @@ export default class RulesUI extends Component {
   }
 
   render() {
+    console.log(this.state.rules)
+
     return !this.state.loading ? (
       <div>
         <h3>Alert Settings</h3>
@@ -129,6 +129,7 @@ export default class RulesUI extends Component {
           ))}
         </div>
 
+        {/*  text message func
         <TextField
           id="numberTo"
           floatingLabelText="Phone Number"
@@ -141,19 +142,13 @@ export default class RulesUI extends Component {
           floatingLabelText="Alert Message"
           value={this.state.alertMessage}
           onChange={this.onInputChange}
-        />
+        />*/}
+
         <br />
         <RaisedButton
           onClick={() => {
             this.props.handleClose()
-            this.props.saveSettings({
-              ...makeNumberStringInt(this.state.rules),
-              alertSettings: {
-                from: "Wimo",
-                to: this.state.numberTo,
-                message: this.state.alertMessage
-              }
-            })
+            updateAlertConfig(this.props.deviceId, this.state.rules)
           }}
           label="Save"
         />

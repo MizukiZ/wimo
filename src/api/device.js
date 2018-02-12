@@ -1,4 +1,6 @@
 import api from "./init"
+import "whatwg-fetch"
+
 const request = require("request")
 
 const appId = process.env.REACT_APP_CONCTR_APP_API_ID
@@ -30,18 +32,51 @@ export function getModel(deviceId) {
 }
 
 // for getting alert setting
-export function getModelData(deviceId) {
-  return api
-    .post(
-      `/data/apps/2bf8fdd3b3144deea63aa54402938d68/devices/${deviceId}/getdata`
-      // {
-      //   headers: {
-      //     "Content-type": "application/json",
-      //     Authorization: `api:${process.env.REACT_APP_DEVICE_API_KEY}`
-      //   }
-      // }
-    )
-    .then(res => res.data.data)
+export function getAlertConfig(deviceId) {
+  return fetch(
+    `https://api.staging.conctr.com/data/apps/${appId}/devices/${deviceId}/getdata`,
+    {
+      method: "post",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `api:${process.env.REACT_APP_DEVICE_API_KEY}`
+      }
+    }
+  )
+    .then(res => res.json())
+    .then(data => {
+      return data.data._data
+    })
+    .catch(error => {
+      throw Error(error)
+    })
+}
+
+// for update alert setting
+export function updateAlertConfig(deviceId, body) {
+  // const payload = {
+  //   _payload: {
+  //     humiMax: "60"
+  //   }
+  // }
+
+  // const data = new FormData()
+  // data.append("json", JSON.stringify(payload))
+
+  return fetch(
+    `https://api.staging.conctr.com/data/apps/${appId}/devices/${deviceId}`,
+    {
+      method: "post",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `api:${process.env.REACT_APP_DEVICE_API_KEY}`
+      },
+      body: JSON.stringify({
+        alertconfig: body
+      })
+    }
+  )
+    .then(res => res)
     .catch(error => {
       throw Error(error)
     })

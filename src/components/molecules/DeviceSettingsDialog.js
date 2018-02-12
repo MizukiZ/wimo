@@ -26,6 +26,7 @@ export default class DeviceSettingsDialog extends React.Component {
 
   render() {
     let deviceData = this.props.deviceData
+
     return (
       <div className="device-settings">
         <IconButton
@@ -58,13 +59,13 @@ export default class DeviceSettingsDialog extends React.Component {
           />
           <RaisedButton onClick={this.handleClose} label="Close" />
           {/*  alert setting is disabled*/}
-          {/*<RulesUI
+          <RulesUI
             keysShown={this.props.keysShown}
             handleClose={this.handleClose}
-            saveSettings={this.props.saveSettings}
             resetGraphsShown={this.props.resetGraphsShown}
             sortedGraphs={this.props.sortedGraphs}
-          />*/}
+            deviceId={deviceData.id}
+          />
         </Drawer>
       </div>
     )

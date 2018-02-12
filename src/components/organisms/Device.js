@@ -3,7 +3,8 @@ import * as deviceWebSocket from "../../api/deviceWebSockets"
 import {
   getModel as getDeviceModel,
   update as updateDevice,
-  getModelData,
+  getAlertConfig,
+  updateAlertConfig,
   getSingle as getDevice,
   setAlertSettings as setDeviceAlertSettings,
   getAlertSettings as getDeviceAlertSettings
@@ -87,8 +88,10 @@ export default class DeviceInfo extends Component {
   originalShownKeys
 
   async componentDidMount() {
-    const moduleData = await getModelData(this.props.deviceId)
-    console.log(moduleData._data)
+    const moduleData = await getAlertConfig(this.props.deviceId)
+    console.log(moduleData)
+
+    updateAlertConfig(this.props.deviceId, { tempMax: "35" })
 
     deviceWebSocket.getDevicesData(
       this.props.deviceId,
@@ -320,6 +323,7 @@ export default class DeviceInfo extends Component {
       this.state.data,
       this.allGraphs.map(graph => graph.key)
     )
+    console.log(sortedData)
     let alertConditions = getOnlyConditions(this.alertSettings)
     return (
       <div style={{ textAlign: "center" }}>
@@ -414,9 +418,10 @@ export default class DeviceInfo extends Component {
                               )}`}
                             >*/}
                             <h3 className={"status-data-value"}>
-                              {sortedData[keyShown.key].values[0].value.toFixed(
-                                1
-                              )}{" "}
+                              {sortedData[keyShown.key].values[0].value &&
+                                sortedData[
+                                  keyShown.key
+                                ].values[0].value.toFixed(1)}{" "}
                               {keyShown.unit}
                             </h3>
                           </div>
