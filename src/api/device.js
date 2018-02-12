@@ -1,4 +1,5 @@
 import api from "./init"
+
 const request = require("request")
 
 const appId = process.env.REACT_APP_CONCTR_APP_API_ID
@@ -26,6 +27,24 @@ export function getModel(deviceId) {
     .then(res => res.data.data.events)
     .catch(error => {
       throw Error(error.response.data.error)
+    })
+}
+
+// for getting alert setting
+export function getModelData(deviceId) {
+  return api
+    .post(
+      `/data/apps/2bf8fdd3b3144deea63aa54402938d68/devices/${deviceId}/getdata`
+      // {
+      //   headers: {
+      //     "Content-type": "application/json",
+      //     Authorization: `api:${process.env.REACT_APP_DEVICE_API_KEY}`
+      //   }
+      // }
+    )
+    .then(res => res.data.data)
+    .catch(error => {
+      throw Error(error)
     })
 }
 

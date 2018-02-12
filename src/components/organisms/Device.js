@@ -3,6 +3,7 @@ import * as deviceWebSocket from "../../api/deviceWebSockets"
 import {
   getModel as getDeviceModel,
   update as updateDevice,
+  getModelData,
   getSingle as getDevice,
   setAlertSettings as setDeviceAlertSettings,
   getAlertSettings as getDeviceAlertSettings
@@ -85,7 +86,10 @@ export default class DeviceInfo extends Component {
 
   originalShownKeys
 
-  componentDidMount() {
+  async componentDidMount() {
+    const moduleData = await getModelData(this.props.deviceId)
+    console.log(moduleData._data)
+
     deviceWebSocket.getDevicesData(
       this.props.deviceId,
       this.updateData,

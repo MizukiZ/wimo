@@ -1,6 +1,6 @@
 import api from "./init"
 import { setToken } from "./init"
-import { setEncodedToken } from '../api/profileToken'
+import { setEncodedToken } from "../api/profileToken"
 import { getConctrDecodedToken } from "./token"
 
 const appId = process.env.REACT_APP_CONCTR_APP_API_ID
@@ -52,7 +52,7 @@ export function authSignIn(email, provider, access_token) {
 }
 
 export function authRegister(email, provider, access_token) {
-  api.defaults.headers["Authorization"] = `oth:${access_token}`
+  // api.defaults.headers["Authorization"] = `oth:${access_token}`
   return api
     .post(
       `/consumers/admin/${appId}/oauth/register`,
