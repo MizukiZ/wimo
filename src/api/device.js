@@ -1,5 +1,4 @@
 import api from "./init"
-
 const request = require("request")
 
 const appId = process.env.REACT_APP_CONCTR_APP_API_ID
