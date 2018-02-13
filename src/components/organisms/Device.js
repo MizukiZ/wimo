@@ -81,6 +81,7 @@ export default class DeviceInfo extends Component {
       loaderShown: false,
       keysShown: [],
       selectedGraphKey: null,
+      originalRules: null,
       rules: null
     }
     this.defaultChange = null
@@ -101,7 +102,10 @@ export default class DeviceInfo extends Component {
       getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
-        this.setState({ rules: deviceAlertSettings.alertconfig })
+        this.setState({
+          rules: deviceAlertSettings.alertconfig,
+          originalRules: deviceAlertSettings.alertconfig
+        })
         this.deviceData = deviceData
         this.setState({ newDeviceName: deviceData.name })
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
@@ -137,6 +141,10 @@ export default class DeviceInfo extends Component {
       getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
+        this.setState({
+          rules: deviceAlertSettings.alertconfig,
+          originalRules: deviceAlertSettings.alertconfig
+        })
         this.deviceData = deviceData
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
         this.allGraphs = model.map(modelData => {
@@ -272,10 +280,79 @@ export default class DeviceInfo extends Component {
     //todo save device name
   }
 
-  reloadAlertSetting = () => {
-    getAlertConfig(this.props.deviceId).then(deviceAlertSettings => {
-      this.setState({ rules: deviceAlertSettings.alertconfig })
-    })
+  changeRule = (key, condition, value) => {
+    const reverseCondition = condition === "GT" ? "LT" : "GT"
+    // Turn values into such usable format
+    let rules = { ...this.state.rules }
+
+    if (value) {
+      // when value is there
+
+      // if the key exists make empty object container
+      if (!rules[key]) {
+        rules[key] = {}
+      }
+      rules[key][condition] = Number(value)
+      if (!rules[key][reverseCondition]) {
+        // if the other condition is empty put null
+        rules[key][reverseCondition] = null
+      }
+    } else {
+      // when value is not there
+
+      if (rules[key][condition]) {
+        // put null for the empty field
+        rules[key][condition] = null
+      }
+
+      if (
+        //WTF
+        Object.keys(rules[key]).length === 0 &&
+        rules[key].constructor === Object
+      ) {
+        delete rules[key]
+      }
+    }
+
+    this.setState({ rules: rules })
+  }
+
+  onToggle = (key, condition, toggleVal, fieldValue) => {
+    const reverseCondition = condition === "GT" ? "LT" : "GT"
+    console.log(key, condition, toggleVal, fieldValue)
+    let rules = { ...this.state.rules }
+    if (toggleVal) {
+      // off -> on
+      if (fieldValue) {
+        // if value is there
+        if (!rules[key]) {
+          // if doesn't exist make new container
+          rules[key] = {}
+        }
+        rules[key][condition] = Number(fieldValue)
+      } else {
+        // if key exists
+        rules[key][condition] = this.state.originalRules[key][condition]
+      }
+    } else {
+      // on -> off
+      if (rules[key]) {
+        // if the key exists
+        if (rules[key][condition]) {
+          // put null to the field
+          rules[key][condition] = null
+        }
+        if (
+          //wtf
+
+          Object.keys(rules[key]).length === 0 &&
+          rules[key].constructor === Object
+        ) {
+          delete rules[key]
+        }
+      }
+    }
+    this.setState({ rules: rules })
   }
 
   handleAlerts = (err, res) => {
@@ -290,6 +367,12 @@ export default class DeviceInfo extends Component {
     this.setState({ newDeviceName: newDeviceName })
   }
 
+  cancelSetting = () => {
+    getAlertConfig(this.props.deviceId).then(alertConfigData => {
+      this.setState({ rules: alertConfigData.alertconfig })
+    })
+  }
+
   resetGraphsShown = () => {}
 
   checkIfOutOfRange = (key, value) => {
@@ -302,11 +385,6 @@ export default class DeviceInfo extends Component {
     else if (!lowerlimit && upperlimit > value) return ""
     else if (lowerlimit > value || upperlimit < value) return "warning"
     else return ""
-    // if (value > limitValues["GT"] || value < limitValues["LT"]) {
-    //   return "warning"
-    // } else {
-    //   return ""
-    // }
   }
 
   render() {
@@ -383,7 +461,10 @@ export default class DeviceInfo extends Component {
                         sortedGraphs={sortedGraphs}
                         deviceData={this.deviceData}
                         keysShown={this.state.keysShown}
-                        reloadAlertSetting={this.reloadAlertSetting}
+                        changeRuleFromDevice={this.changeRule}
+                        onToggleFromDevice={this.onToggle}
+                        rulesFromDevice={this.state.rules}
+                        cancelSetting={this.cancelSetting}
                       />
                     ) : (
                       <CircularProgress />

@@ -24,7 +24,7 @@ export default class RuleRow extends Component {
           }}
         >
           <RuleCell
-            changeRule={this.props.changeRule}
+            changeRuleFromDevice={this.props.changeRuleFromDevice}
             onToggle={this.props.onToggle}
             identifier={this.props.identifier}
             cellData={this.props.ruleData ? this.props.ruleData["LT"] : null}
@@ -32,7 +32,7 @@ export default class RuleRow extends Component {
             text={"min"}
           />
           <RuleCell
-            changeRule={this.props.changeRule}
+            changeRuleFromDevice={this.props.changeRuleFromDevice}
             onToggle={this.props.onToggle}
             cellData={this.props.ruleData ? this.props.ruleData["GT"] : null}
             identifier={this.props.identifier}

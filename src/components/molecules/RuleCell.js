@@ -17,13 +17,13 @@ export default class RuleCell extends Component {
     })
   }
 
-  componentDidMount() {
+  componentWillReceiveProps(nextProps) {
     let returnVal = ""
-    if (this.props.cellData) {
-      returnVal = this.props.cellData
+    if (nextProps.cellData) {
+      returnVal = nextProps.cellData
     }
     this.setState({
-      enabled: !!this.props.cellData,
+      enabled: !!nextProps.cellData,
       value: returnVal
     })
   }
@@ -56,7 +56,7 @@ export default class RuleCell extends Component {
             value={this.state.value}
             onChange={(event, newValue) => {
               this.setState({ value: newValue })
-              this.props.changeRule(
+              this.props.changeRuleFromDevice(
                 this.props.identifier,
                 this.props.condition,
                 newValue
