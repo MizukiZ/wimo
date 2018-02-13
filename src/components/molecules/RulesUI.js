@@ -32,24 +32,39 @@ export default class RulesUI extends Component {
   */
 
   changeRule = (key, condition, value) => {
+    const reverseCondition = condition === "GT" ? "LT" : "GT"
     // Turn values into such usable format
     let rules = { ...this.state.rules }
+
     if (value) {
+      // when value is there
+
+      // if the key exists make empty object container
       if (!rules[key]) {
         rules[key] = {}
       }
-      rules[key][condition] = value
-    } else {
-      if (rules[key][condition]) {
-        delete rules[key][condition]
+      rules[key][condition] = Number(value)
+      if (!rules[key][reverseCondition]) {
+        // if the other condition is empty put null
+        rules[key][reverseCondition] = null
       }
+    } else {
+      // when value is not there
+
+      if (rules[key][condition]) {
+        // put null for the empty field
+        rules[key][condition] = null
+      }
+
       if (
+        //WTF
         Object.keys(rules[key]).length === 0 &&
         rules[key].constructor === Object
       ) {
         delete rules[key]
       }
     }
+
     this.setState({ rules: rules })
   }
 
@@ -60,20 +75,29 @@ export default class RulesUI extends Component {
   // }
 
   onToggle = (key, condition, toggleVal, fieldValue) => {
+    const reverseCondition = condition === "GT" ? "LT" : "GT"
+
     let rules = { ...this.state.rules }
     if (toggleVal) {
+      // off -> on
       if (fieldValue) {
+        // if value is there
         if (!rules[key]) {
+          // if doesn't exist make new container
           rules[key] = {}
         }
-        rules[key][condition] = fieldValue
+        rules[key][condition] = Number(fieldValue)
       }
     } else {
+      // on -> off
       if (rules[key]) {
+        // if the key exists
         if (rules[key][condition]) {
-          delete rules[key][condition]
+          // put null to the field
+          rules[key][condition] = null
         }
         if (
+          //wtf
           Object.keys(rules[key]).length === 0 &&
           rules[key].constructor === Object
         ) {
@@ -89,8 +113,6 @@ export default class RulesUI extends Component {
       this.setState({
         rules: data.alertconfig,
         loading: false
-        // numberTo: this.alertSendSettings.to,
-        // alertMessage: this.alertSendSettings.message
       })
     })
   }
@@ -108,8 +130,6 @@ export default class RulesUI extends Component {
   }
 
   render() {
-    console.log(this.state.rules)
-
     return !this.state.loading ? (
       <div>
         <h3>Alert Settings</h3>
@@ -147,8 +167,16 @@ export default class RulesUI extends Component {
         <br />
         <RaisedButton
           onClick={() => {
+            const updateData = {}
+            updateData["alertconfig"] = this.state.rules
+            updateData["alertconfig"]["selectedKey"] = this.props.keysShown.map(
+              key => key.key
+            )
+
             this.props.handleClose()
-            updateAlertConfig(this.props.deviceId, this.state.rules)
+            updateAlertConfig(this.props.deviceId, updateData).then(() => {
+              this.props.reloadAlertSetting()
+            })
           }}
           label="Save"
         />

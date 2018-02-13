@@ -1,26 +1,25 @@
-import React, { Component } from 'react'
-import Toggle from 'material-ui/Toggle'
-import TextField from 'material-ui/TextField'
+import React, { Component } from "react"
+import Toggle from "material-ui/Toggle"
+import TextField from "material-ui/TextField"
 
-export default class RuleCell extends Component{
-
+export default class RuleCell extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       enabled: false,
-      value: ''
+      value: ""
     }
   }
 
-  handleToggleChange = (changedBool) => {
+  handleToggleChange = changedBool => {
     this.setState({
       enabled: changedBool
     })
   }
 
-  componentDidMount(){
-    let returnVal = ''
-    if(this.props.cellData) {
+  componentDidMount() {
+    let returnVal = ""
+    if (this.props.cellData) {
       returnVal = this.props.cellData
     }
     this.setState({
@@ -31,16 +30,23 @@ export default class RuleCell extends Component{
 
   render() {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center'
-      }}>
-        <div style={{width: '50px'}}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center"
+        }}
+      >
+        <div style={{ width: "50px" }}>
           <Toggle
             toggled={this.state.enabled}
-            onToggle={(e,inputChecked) =>{
-              this.props.onToggle(this.props.identifier,this.props.condition,inputChecked,this.state.value)
+            onToggle={(e, inputChecked) => {
+              this.props.onToggle(
+                this.props.identifier,
+                this.props.condition,
+                inputChecked,
+                this.state.value
+              )
               this.handleToggleChange(inputChecked)
             }}
           />
@@ -48,11 +54,15 @@ export default class RuleCell extends Component{
         <div>
           <TextField
             value={this.state.value}
-            onChange={(event,newValue) => {
-              this.setState({value: newValue})
-              this.props.changeRule(this.props.identifier,this.props.condition,newValue)
+            onChange={(event, newValue) => {
+              this.setState({ value: newValue })
+              this.props.changeRule(
+                this.props.identifier,
+                this.props.condition,
+                newValue
+              )
             }}
-            style={{width: '40px'}}
+            style={{ width: "40px" }}
             floatingLabelText={this.props.text}
             disabled={!this.state.enabled}
           />

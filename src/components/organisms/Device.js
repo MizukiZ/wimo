@@ -5,9 +5,9 @@ import {
   update as updateDevice,
   getAlertConfig,
   updateAlertConfig,
-  getSingle as getDevice,
-  setAlertSettings as setDeviceAlertSettings,
-  getAlertSettings as getDeviceAlertSettings
+  getSingle as getDevice
+  // setAlertSettings as setDeviceAlertSettings,
+  // getAlertSettings as getDeviceAlertSettings
 } from "../../api/device"
 import CircularProgress from "material-ui/CircularProgress"
 import Menu from "material-ui/Menu"
@@ -80,7 +80,8 @@ export default class DeviceInfo extends Component {
       hoursBack: 3,
       loaderShown: false,
       keysShown: [],
-      selectedGraphKey: null
+      selectedGraphKey: null,
+      rules: null
     }
     this.defaultChange = null
   }
@@ -88,11 +89,6 @@ export default class DeviceInfo extends Component {
   originalShownKeys
 
   async componentDidMount() {
-    const moduleData = await getAlertConfig(this.props.deviceId)
-    console.log(moduleData)
-
-    updateAlertConfig(this.props.deviceId, { tempMax: "35" })
-
     deviceWebSocket.getDevicesData(
       this.props.deviceId,
       this.updateData,
@@ -102,12 +98,13 @@ export default class DeviceInfo extends Component {
     Promise.all([
       getDeviceModel(this.props.deviceId),
       getDevice(this.props.deviceId),
-      getDeviceAlertSettings()
+      getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
+        this.setState({ rules: deviceAlertSettings.alertconfig })
         this.deviceData = deviceData
         this.setState({ newDeviceName: deviceData.name })
-        this.alertSettings = deviceAlertSettings
+        this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
         this.allGraphs = model.map(modelData => {
           return {
             displayTitle: modelData.title,
@@ -124,6 +121,7 @@ export default class DeviceInfo extends Component {
   }
 
   componentWillReceiveProps({ deviceId }) {
+    // when device id has been changed this will happen
     this.setState({
       data: null
     })
@@ -136,11 +134,11 @@ export default class DeviceInfo extends Component {
     Promise.all([
       getDeviceModel(this.props.deviceId),
       getDevice(this.props.deviceId),
-      getDeviceAlertSettings()
+      getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
         this.deviceData = deviceData
-        this.alertSettings = deviceAlertSettings
+        this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
         this.allGraphs = model.map(modelData => {
           return {
             displayTitle: modelData.title,
@@ -259,19 +257,25 @@ export default class DeviceInfo extends Component {
 
   getDeviceSettings = () => {
     // Graph Preference
-    let alertSettingConditions = { ...this.alertSettings }
-    delete alertSettingConditions.alertSettings
+    const selectedKey = this.alertSettings
     let array = []
-    Object.keys(alertSettingConditions).forEach(settingCondition => {
+    // chose what you need to show
+    selectedKey.forEach(settingCondition => {
       array.push(this.allGraphs.find(graph => graph.key === settingCondition))
     })
     this.setState({ keysShown: array })
   }
 
   saveDeviceSettings = rules => {
-    setDeviceAlertSettings(this.props.deviceId, rules, this.handleAlerts)
+    // setDeviceAlertSettings(this.props.deviceId, rules, this.handleAlerts)
     updateDevice(this.deviceData.id, { new_name: this.state.newDeviceName })
     //todo save device name
+  }
+
+  reloadAlertSetting = () => {
+    getAlertConfig(this.props.deviceId).then(deviceAlertSettings => {
+      this.setState({ rules: deviceAlertSettings.alertconfig })
+    })
   }
 
   handleAlerts = (err, res) => {
@@ -289,32 +293,20 @@ export default class DeviceInfo extends Component {
   resetGraphsShown = () => {}
 
   checkIfOutOfRange = (key, value) => {
-    let upperLimit, lowerLimit
-    if (this.alertSettings[key]) {
-      upperLimit = this.alertSettings[key]["GT"]
-      lowerLimit = this.alertSettings[key]["LT"]
-    }
-    if (value > upperLimit || value < lowerLimit) {
-      return "warning"
-    } else {
-      return ""
-    }
-  }
-
-  checkIfArrayOutOfRange = (key, array) => {
-    let upperLimit, lowerLimit
-    if (this.alertSettings[key]) {
-      lowerLimit = this.alertSettings[key]["LT"]
-      upperLimit = this.alertSettings[key]["GT"]
-    }
-    if (
-      (lowerLimit && !array.values.every(value => value.value > lowerLimit)) ||
-      (upperLimit && !array.values.every(value => value.value < upperLimit))
-    ) {
-      return <CrossIcon color="red" />
-    } else {
-      return <div />
-    }
+    if (value === null) return
+    let upperlimit = this.state.rules[key]["GT"]
+    let lowerlimit = this.state.rules[key]["LT"]
+    if (!upperlimit && lowerlimit > value) return "warning"
+    else if (!upperlimit && lowerlimit < value) return ""
+    else if (!lowerlimit && upperlimit < value) return "warning"
+    else if (!lowerlimit && upperlimit > value) return ""
+    else if (lowerlimit > value || upperlimit < value) return "warning"
+    else return ""
+    // if (value > limitValues["GT"] || value < limitValues["LT"]) {
+    //   return "warning"
+    // } else {
+    //   return ""
+    // }
   }
 
   render() {
@@ -323,7 +315,6 @@ export default class DeviceInfo extends Component {
       this.state.data,
       this.allGraphs.map(graph => graph.key)
     )
-    console.log(sortedData)
     let alertConditions = getOnlyConditions(this.alertSettings)
     return (
       <div style={{ textAlign: "center" }}>
@@ -392,6 +383,7 @@ export default class DeviceInfo extends Component {
                         sortedGraphs={sortedGraphs}
                         deviceData={this.deviceData}
                         keysShown={this.state.keysShown}
+                        reloadAlertSetting={this.reloadAlertSetting}
                       />
                     ) : (
                       <CircularProgress />
@@ -408,22 +400,25 @@ export default class DeviceInfo extends Component {
                             <p className="status-data-type">
                               {keyShown.displayTitle}
                             </p>
-                            {/* disable the data value blinking func*/}
-                            {/*<h3
-                              className={`status-data-value ${this.checkIfOutOfRange(
-                                keyShown.key,
-                                sortedData[
-                                  keyShown.key
-                                ].values[0].value.toFixed(1)
-                              )}`}
-                            >*/}
-                            <h3 className={"status-data-value"}>
-                              {sortedData[keyShown.key].values[0].value &&
-                                sortedData[
-                                  keyShown.key
-                                ].values[0].value.toFixed(1)}{" "}
-                              {keyShown.unit}
-                            </h3>
+
+                            {this.state.rules && (
+                              <h3
+                                className={`status-data-value ${this.checkIfOutOfRange(
+                                  keyShown.key,
+                                  sortedData[keyShown.key].values[0].value
+                                    ? sortedData[
+                                        keyShown.key
+                                      ].values[0].value.toFixed(1)
+                                    : null
+                                )}`}
+                              >
+                                {sortedData[keyShown.key].values[0].value &&
+                                  sortedData[
+                                    keyShown.key
+                                  ].values[0].value.toFixed(1)}{" "}
+                                {keyShown.unit}
+                              </h3>
+                            )}
                           </div>
                         ))}
                       </div>

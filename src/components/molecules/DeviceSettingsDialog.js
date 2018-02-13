@@ -65,6 +65,7 @@ export default class DeviceSettingsDialog extends React.Component {
             resetGraphsShown={this.props.resetGraphsShown}
             sortedGraphs={this.props.sortedGraphs}
             deviceId={deviceData.id}
+            reloadAlertSetting={this.props.reloadAlertSetting}
           />
         </Drawer>
       </div>
