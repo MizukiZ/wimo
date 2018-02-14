@@ -87,9 +87,11 @@ export default class DeviceInfo extends Component {
     this.defaultChange = null
   }
 
-  originalShownKeys
-
   async componentDidMount() {
+    getAlertConfig(this.props.deviceId).then(alertConfig => {
+      this.setState({ originalRules: alertConfig.alertconfig })
+    })
+
     deviceWebSocket.getDevicesData(
       this.props.deviceId,
       this.updateData,
@@ -103,7 +105,6 @@ export default class DeviceInfo extends Component {
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
         this.setState({ rules: deviceAlertSettings.alertconfig })
-        this.setState({ originalRules: deviceAlertSettings.alertconfig })
         this.deviceData = deviceData
         this.setState({ newDeviceName: deviceData.name })
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
@@ -140,7 +141,6 @@ export default class DeviceInfo extends Component {
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
         this.setState({ rules: deviceAlertSettings.alertconfig })
-        this.setState({ originalRules: deviceAlertSettings.alertconfig })
         this.deviceData = deviceData
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
         this.allGraphs = model.map(modelData => {
@@ -315,7 +315,6 @@ export default class DeviceInfo extends Component {
 
   onToggle = (key, condition, toggleVal, fieldValue) => {
     const reverseCondition = condition === "GT" ? "LT" : "GT"
-    console.log(key, condition, toggleVal, fieldValue)
     let rules = { ...this.state.rules }
     if (toggleVal) {
       // off -> on
@@ -328,10 +327,8 @@ export default class DeviceInfo extends Component {
         rules[key][condition] = Number(fieldValue)
       } else {
         // if key exists
-        console.log("here")
-        getAlertConfig(this.props.deviceId).then(data => {
-          rules[key][condition] = data.alertconfig[key][condition]
-        })
+
+        rules[key][condition] = this.state.originalRules[key][condition]
       }
     } else {
       // on -> off
@@ -370,6 +367,13 @@ export default class DeviceInfo extends Component {
     getAlertConfig(this.props.deviceId).then(alertConfigData => {
       this.setState({ rules: alertConfigData.alertconfig })
     })
+  }
+
+  updateOriginalRuels = () => {
+    // make clone of the state.
+    var cloneRules = JSON.parse(JSON.stringify(this.state.rules))
+
+    this.setState({ originalRules: cloneRules })
   }
 
   resetGraphsShown = () => {}
@@ -464,6 +468,7 @@ export default class DeviceInfo extends Component {
                         onToggleFromDevice={this.onToggle}
                         rulesFromDevice={this.state.rules}
                         cancelSetting={this.cancelSetting}
+                        updateOriginalRuels={this.updateOriginalRuels}
                       />
                     ) : (
                       <CircularProgress />

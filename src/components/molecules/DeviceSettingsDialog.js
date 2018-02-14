@@ -69,6 +69,7 @@ export default class DeviceSettingsDialog extends React.Component {
             onToggleFromDevice={this.props.onToggleFromDevice}
             rulesFromDevice={this.props.rulesFromDevice}
             cancelSetting={this.props.cancelSetting}
+            updateOriginalRuels={this.props.updateOriginalRuels}
           />
         </Drawer>
       </div>

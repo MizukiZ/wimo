@@ -24,7 +24,6 @@ export default class DevicePaper extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // console.log('nextProps',nextProps)
     this.setState({ selectedDevice: nextProps.pathname })
   }
 

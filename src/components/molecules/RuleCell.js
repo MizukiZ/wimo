@@ -17,15 +17,17 @@ export default class RuleCell extends Component {
     })
   }
 
-  componentWillReceiveProps(nextProps) {
-    console.log(nextProps)
-    let returnVal = ""
-    if (nextProps.cellData) {
-      returnVal = nextProps.cellData
-    }
+  componentDidMount() {
     this.setState({
-      enabled: !!nextProps.cellData,
-      value: returnVal
+      enabled: !!this.props.cellData,
+      value: this.props.cellData || ""
+    })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      // enabled: !!nextProps.cellData,
+      value: nextProps.cellData || ""
     })
   }
 

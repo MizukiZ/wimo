@@ -73,13 +73,16 @@ export default class RulesUI extends Component {
         <br />
         <RaisedButton
           onClick={() => {
+            // make data for post request
             const updateData = {}
             updateData["alertconfig"] = this.state.rules
             updateData["alertconfig"]["selectedKey"] = this.props.keysShown.map(
               key => key.key
             )
 
-            updateAlertConfig(this.props.deviceId, updateData)
+            updateAlertConfig(this.props.deviceId, updateData).then(() => {
+              this.props.updateOriginalRuels()
+            })
             this.props.handleClose()
           }}
           label="Save"
