@@ -327,8 +327,11 @@ export default class DeviceInfo extends Component {
         rules[key][condition] = Number(fieldValue)
       } else {
         // if key exists
-
-        rules[key][condition] = this.state.originalRules[key][condition]
+        if (!!rules[key]) {
+          rules[key][condition] = this.state.originalRules[key]
+            ? this.state.originalRules[key][condition]
+            : null
+        }
       }
     } else {
       // on -> off
@@ -379,7 +382,7 @@ export default class DeviceInfo extends Component {
   resetGraphsShown = () => {}
 
   checkIfOutOfRange = (key, value) => {
-    if (value === null) return
+    if (value === null || !this.state.rules[key]) return
     let upperlimit = this.state.rules[key]["GT"]
     let lowerlimit = this.state.rules[key]["LT"]
     if (!upperlimit && lowerlimit > value) return "warning"
