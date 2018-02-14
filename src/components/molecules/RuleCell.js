@@ -18,6 +18,7 @@ export default class RuleCell extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log(nextProps)
     let returnVal = ""
     if (nextProps.cellData) {
       returnVal = nextProps.cellData

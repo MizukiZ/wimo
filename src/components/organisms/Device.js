@@ -102,10 +102,8 @@ export default class DeviceInfo extends Component {
       getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
-        this.setState({
-          rules: deviceAlertSettings.alertconfig,
-          originalRules: deviceAlertSettings.alertconfig
-        })
+        this.setState({ rules: deviceAlertSettings.alertconfig })
+        this.setState({ originalRules: deviceAlertSettings.alertconfig })
         this.deviceData = deviceData
         this.setState({ newDeviceName: deviceData.name })
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
@@ -141,10 +139,8 @@ export default class DeviceInfo extends Component {
       getAlertConfig(this.props.deviceId)
     ])
       .then(([model, deviceData, deviceAlertSettings]) => {
-        this.setState({
-          rules: deviceAlertSettings.alertconfig,
-          originalRules: deviceAlertSettings.alertconfig
-        })
+        this.setState({ rules: deviceAlertSettings.alertconfig })
+        this.setState({ originalRules: deviceAlertSettings.alertconfig })
         this.deviceData = deviceData
         this.alertSettings = deviceAlertSettings.alertconfig.selectedKey
         this.allGraphs = model.map(modelData => {
@@ -332,7 +328,10 @@ export default class DeviceInfo extends Component {
         rules[key][condition] = Number(fieldValue)
       } else {
         // if key exists
-        rules[key][condition] = this.state.originalRules[key][condition]
+        console.log("here")
+        getAlertConfig(this.props.deviceId).then(data => {
+          rules[key][condition] = data.alertconfig[key][condition]
+        })
       }
     } else {
       // on -> off

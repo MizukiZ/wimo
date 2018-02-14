@@ -9,6 +9,8 @@ import RuleCell from "./RuleCell"
 
 export default class RuleRow extends Component {
   render() {
+    console.log(this.props.ruleData)
+
     return (
       <Toolbar style={{ backgroundColor: "white", width: "100%" }}>
         <ToolbarTitle
